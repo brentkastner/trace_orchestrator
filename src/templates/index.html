@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Clients {% endblock %}</h1>
+    {% for client in clients %}
+        <div class='post'>
+            <p>{{ client['created'] }}</p>
+            <h2>{{ client['name'] }}</h2>
+            <p>{{ client['hash'] }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}
