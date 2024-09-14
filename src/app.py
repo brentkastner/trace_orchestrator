@@ -1,9 +1,11 @@
 import sqlite3
+import os
 from flask import Flask, render_template, request, jsonify, json
 import secrets, requests
 app = Flask(__name__)
 
-base_url = "localhost:3000"
+base_url = os.environ.get('HOSTNAME') or 'http://localhost:3000'
+print(f"Starting server with {base_url}")
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -48,7 +50,7 @@ def call_usetrace_api(trace, run_hash):
 
 @app.route("/")
 def home():
-    return f"Hello, Trace Orchestrator {secrets.token_urlsafe(16)}!"
+    return f"Hello, Trace Orchestrator!"
 
 @app.route('/getClients')
 def index():
