@@ -45,6 +45,13 @@ The following diagram illustrates the architecture. This can be run anywhere but
 
    If you pass an environment variable HOSTNAME to the container the container will automatically use this variable. This is important because the HOSTNAME is used to construct the WEBHOOK url that Usetrace uses to indicate it has finished running one of the traces.
 
+7. Sample CI Integration command
+
+   From your CI create json file in the format below and name it something like test_order.json. Then load the tests into the run using the following sample command which POSTs the json file to the orchestrator. You should receive a hash back which will identify the unique run of all the traces and tags you've listed. You can also watch the status on the /getRuns GET endpoint
+   
+   ```
+    curl -X POST -H "Content-Type: application/json" -d @test_order.json https://<HOSTNAME/scheduleRun/wKFv06_08lboHBo7l5NJIA
+   ```
 
 ## Endpoints
 
