@@ -15,5 +15,6 @@ CREATE TABLE runs (
     runOrder INTEGER NOT NULL,
     run_hash TEXT NOT NULL,
     client_hash TEXT NOT NULL,
-    usetrace_api_response TEXT
+    usetrace_api_response TEXT,
+    projectID TEXT NOT NULL
 );

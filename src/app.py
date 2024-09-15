@@ -7,16 +7,30 @@ app = Flask(__name__)
 base_url = os.environ.get('HOSTNAME') or 'http://localhost:3000'
 print(f"Starting server with {base_url}")
 
+def testTest():
+    return True
+
+def urlBuilder(trace, projectID):
+    if (trace[:4].lower() == "tag:"):
+        return f"https://api.usetrace.com/api/project/{projectID}/execute-all"
+    return f"https://api.usetrace.com/api/trace/{trace}/execute"
+
+def dataBuilder(trace, webhook_url):
+    data = {"requiredCapabilities": [{"browserName": "chrome"}], "reporters": [{"webhook": {"url": webhook_url, "when": "always"}}]}
+    if (trace[:4].lower() == "tag:"):
+        data['tags'] = [f"{trace[4:]}"]
+    return data
+
 def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-def insert_runOrder(client_hash, runHash, runs):
+def insert_runOrder(client_hash, runHash, runs, projectID):
     con = get_db_connection()
     cur = con.cursor()
     for i in range(len(runs)):
-        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace) VALUES (?,?,?,?)", (client_hash, runHash, i, runs[i]))
+        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID) VALUES (?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID))
         con.commit()
     con.close()
 
@@ -26,21 +40,18 @@ def run_next_trace(runHash):
     cur.execute("SELECT * from runs where run_hash = ? and usetrace_api_response is null ORDER BY runOrder ASC", (runHash,))
     row = cur.fetchone()
     if (row):
-        print(f"{row['trace']} with and order of {row['runOrder']}")
-        response = call_usetrace_api(row['trace'], row['run_hash'])
+        print(f"{row['trace']} with and order of {row['runOrder']} for project ID {row['projectID']}")
+        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'])
         cur.execute("UPDATE runs SET usetrace_api_response = ? WHERE id = ?", (response, row['id']))
         con.commit()
     con.close()
     return runHash
 
-def call_usetrace_api(trace, run_hash):
-    url = f"https://api.usetrace.com/api/trace/{trace}/execute"
+def call_usetrace_api(trace, run_hash, projectID):
+    url = urlBuilder(trace, projectID)
     webhook_url = f"{base_url}/webhook/{run_hash}"
+    data = dataBuilder(trace, webhook_url)
 
-    data = {"requiredCapabilities": [{"browserName": "chrome"}], "reporters": [{"webhook": {"url": webhook_url, "when": "always"}}]}
-    #
-    #"tags": [],
-    #"reporters": [{"webhook": {"url": webhook_url, "when": "always"}}]
     json_data = json.dumps(data)
     headers = {"Content-Type": "application/json"}
     response = requests.post(url, data=json_data, headers=headers)
@@ -63,7 +74,8 @@ def index():
 def newRun(client_hash):
     runHash = secrets.token_urlsafe(16)
     runs = request.json['runOrder']
-    insert_runOrder(client_hash, runHash, runs)
+    projectID = request.json['projectID']
+    insert_runOrder(client_hash, runHash, runs, projectID)
     run_next_trace(runHash)
     print(runHash)
     return runHash

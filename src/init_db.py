@@ -8,10 +8,8 @@ with open('schema.sql') as f:
 
 cur = connection.cursor()
 
-client_hash = secrets.token_urlsafe(16)
-
 cur.execute("INSERT INTO clients (name, hash) VALUES (?, ?)",
-            ('Seed Client', client_hash)
+            ('Seed Client', "wKFv06_08lboHBo7l5NJIA")
             )
 
 connection.commit()
