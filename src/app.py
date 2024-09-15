@@ -70,6 +70,13 @@ def index():
     conn.close()
     return render_template('index.html', clients=clients)
 
+@app.route('/getRuns')
+def runIndex():
+    conn = get_db_connection()
+    runs = conn.execute('SELECT * FROM runs').fetchall()
+    conn.close()
+    return render_template('runsIndex.html', runs=runs)
+
 @app.route("/scheduleRun/<client_hash>/", methods=['POST'])
 def newRun(client_hash):
     runHash = secrets.token_urlsafe(16)

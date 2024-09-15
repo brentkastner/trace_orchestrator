@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Runs {% endblock %}</h1>
+    {% for run in runs %}
+        <div class='post'>
+            <p>{{ run['created'] }}</p>
+            <h2>Trace Name: {{ run['trace'] }}</h2>
+            <p>Run hash: {{ run['run_hash'] }}</p>
+            <p>Project ID: {{ run['projectID'] }}</p>
+
+            <p>Order of Trace: {{ run['runOrder'] }}</p>
+            
+            <p>Response from UT: {{ run['usetrace_api_response'] }}</p>
+            
+        </div>
+    {% endfor %}
+{% endblock %}
