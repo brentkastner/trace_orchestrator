@@ -1,6 +1,10 @@
 # Trace Orchestrator Python Flask SQLite App Docker Container
 
-This Docker container sets up a Python Flask application with SQLite as the database. It provides a basic web application for managing user names.
+This Docker container sets up a Python Flask application with SQLite as the database. It provides a basic API to orchestrate Usetrace traces and tags (groups of traces). While Usetrace does not advocate for trace ordering and trace dependencies there are times where things need to be run in a specific order. This orchestrator is light-weight and uses local SQLLITE to store the traces and their order and track execution.
+
+The following diagram illustrates the architecture. This can be run anywhere but recommend a containerized approach. It will drop rigth into a hosting service like Render with no changes to code required.
+
+![Trace Orchestration](/orchestration.png)
 
 ## Requirements
 
@@ -15,16 +19,40 @@ This Docker container sets up a Python Flask application with SQLite as the data
    git clone <repository_url>
    cd trace_orchestrator
    ```
+2. Run the tests:
 
-2. Build and run the Docker container using Docker Compose:
+   ```
+   python -m pytest
+   ```
+
+3. Initialize the database
+
+   ```
+   python src/init_db.py
+   ```
+
+4. Build and run the Docker container using Docker Compose:
 
    ```bash
    docker-compose up -d
    ```
 
-3. Access the application:
+5. Access the application:
 
    Open a web browser and navigate to `http://localhost:3000` to access the  application.
+
+6. Environment Variables
+
+   If you pass an environment variable HOSTNAME to the container the container will automatically use this variable. This is important because the HOSTNAME is used to construct the WEBHOOK url that Usetrace uses to indicate it has finished running one of the traces.
+
+
+## Endpoints
+
+   /scheduleRun/<client_id>
+
+   /getRuns
+
+   /webhook/<run_hash>
 
 ## Notes
 
