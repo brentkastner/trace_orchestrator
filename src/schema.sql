@@ -16,5 +16,6 @@ CREATE TABLE runs (
     run_hash TEXT NOT NULL,
     client_hash TEXT NOT NULL,
     usetrace_api_response TEXT,
-    projectID TEXT NOT NULL
+    projectID TEXT NOT NULL,
+    requiredCapabilities TEXT NOT NULL
 );

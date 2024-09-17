@@ -15,8 +15,8 @@ def urlBuilder(trace, projectID):
         return f"https://api.usetrace.com/api/project/{projectID}/execute-all"
     return f"https://api.usetrace.com/api/trace/{trace}/execute"
 
-def dataBuilder(trace, webhook_url):
-    data = {"requiredCapabilities": [{"browserName": "chrome"}], "reporters": [{"webhook": {"url": webhook_url, "when": "always"}}]}
+def dataBuilder(trace, webhook_url, requiredCapabilities):
+    data = {"requiredCapabilities": json.loads(requiredCapabilities), "reporters": [{"webhook": {"url": webhook_url, "when": "always"}}]}
     if (trace[:4].lower() == "tag:"):
         data['tags'] = [f"{trace[4:]}"]
     return data
@@ -26,11 +26,11 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def insert_runOrder(client_hash, runHash, runs, projectID):
+def insert_runOrder(client_hash, runHash, runs, projectID, requiredCapabilities):
     con = get_db_connection()
     cur = con.cursor()
     for i in range(len(runs)):
-        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID) VALUES (?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID))
+        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities) VALUES (?,?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID, requiredCapabilities))
         con.commit()
     con.close()
 
@@ -41,16 +41,16 @@ def run_next_trace(runHash):
     row = cur.fetchone()
     if (row):
         print(f"{row['trace']} with and order of {row['runOrder']} for project ID {row['projectID']}")
-        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'])
+        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'], row['requiredCapabilities'])
         cur.execute("UPDATE runs SET usetrace_api_response = ? WHERE id = ?", (response, row['id']))
         con.commit()
     con.close()
     return runHash
 
-def call_usetrace_api(trace, run_hash, projectID):
+def call_usetrace_api(trace, run_hash, projectID, requiredCapabilities):
     url = urlBuilder(trace, projectID)
     webhook_url = f"{base_url}/webhook/{run_hash}"
-    data = dataBuilder(trace, webhook_url)
+    data = dataBuilder(trace, webhook_url, requiredCapabilities)
 
     json_data = json.dumps(data)
     headers = {"Content-Type": "application/json"}
@@ -81,8 +81,9 @@ def runIndex():
 def newRun(client_hash):
     runHash = secrets.token_urlsafe(16)
     runs = request.json['runOrder']
+    requiredCapabilities = request.json.get('requiredCapabilities', [{"browserName": "chrome"}])
     projectID = request.json['projectID']
-    insert_runOrder(client_hash, runHash, runs, projectID)
+    insert_runOrder(client_hash, runHash, runs, projectID, json.dumps(requiredCapabilities))
     run_next_trace(runHash)
     print(runHash)
     return runHash
