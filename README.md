@@ -88,6 +88,10 @@ Send this basic JSON document to /scheduleRun/<clienthash> as JSON and POST - th
 
 {
     "projectID": "YXlFJTqD6gAZF_7K9TE7VmYiYVazGMc6",
+    "requiredCapabilities": [
+        {"browserName": "chrome"},
+        {"browserName": "firefox"}
+    ],
     "runOrder": [
         "tag:goon",
         "ZuBmU-WNsQAXLYQJ6mVVjjEjvUD3ZC83",
