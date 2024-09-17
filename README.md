@@ -1,3 +1,4 @@
+[![Python Tests](https://github.com/brentkastner/trace_orchestrator/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/brentkastner/trace_orchestrator/actions/workflows/python-app.yml)
 # Trace Orchestrator Python Flask SQLite App Docker Container
 
 This Docker container sets up a Python Flask application with SQLite as the database. It provides a basic API to orchestrate Usetrace traces and tags (groups of traces). While Usetrace does not advocate for trace ordering and trace dependencies there are times where things need to be run in a specific order. This orchestrator is light-weight and uses local SQLLITE to store the traces and their order and track execution.
