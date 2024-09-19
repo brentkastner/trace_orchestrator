@@ -10,10 +10,15 @@ print(f"Starting server with {base_url}")
 def testTest():
     return True
 
-def urlBuilder(trace, projectID):
+def urlBuilder(trace, projectID, secretKey):
     if (trace[:4].lower() == "tag:"):
+        if (secretKey):
+            return f"https://api.usetrace.com/api/project/{projectID}/execute-all?key={secretKey}"
         return f"https://api.usetrace.com/api/project/{projectID}/execute-all"
-    return f"https://api.usetrace.com/api/trace/{trace}/execute"
+    else:
+        if (secretKey):
+            return f"https://api.usetrace.com/api/trace/{trace}/execute?key={secretKey}"
+        return f"https://api.usetrace.com/api/trace/{trace}/execute"
 
 def dataBuilder(trace, webhook_url, requiredCapabilities):
     data = {"requiredCapabilities": json.loads(requiredCapabilities), "reporters": [{"webhook": {"url": webhook_url, "when": "always"}}]}
@@ -26,11 +31,11 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def insert_runOrder(client_hash, runHash, runs, projectID, requiredCapabilities):
+def insert_runOrder(client_hash, runHash, runs, projectID, requiredCapabilities, secretKey):
     con = get_db_connection()
     cur = con.cursor()
     for i in range(len(runs)):
-        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities) VALUES (?,?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID, requiredCapabilities))
+        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities, secretKey) VALUES (?,?,?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID, requiredCapabilities, secretKey))
         con.commit()
     con.close()
 
@@ -41,14 +46,14 @@ def run_next_trace(runHash):
     row = cur.fetchone()
     if (row):
         print(f"{row['trace']} with and order of {row['runOrder']} for project ID {row['projectID']}")
-        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'], row['requiredCapabilities'])
+        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'], row['requiredCapabilities'], row['secretKey'])
         cur.execute("UPDATE runs SET usetrace_api_response = ? WHERE id = ?", (response, row['id']))
         con.commit()
     con.close()
     return runHash
 
-def call_usetrace_api(trace, run_hash, projectID, requiredCapabilities):
-    url = urlBuilder(trace, projectID)
+def call_usetrace_api(trace, run_hash, projectID, requiredCapabilities, secretKey):
+    url = urlBuilder(trace, projectID, secretKey)
     webhook_url = f"{base_url}/webhook/{run_hash}"
     data = dataBuilder(trace, webhook_url, requiredCapabilities)
 
@@ -58,6 +63,7 @@ def call_usetrace_api(trace, run_hash, projectID, requiredCapabilities):
     if (response.status_code == 200):
         print(response.text)
         return response.text
+    return response.text
 
 @app.route("/")
 def home():
@@ -83,7 +89,8 @@ def newRun(client_hash):
     runs = request.json['runOrder']
     requiredCapabilities = request.json.get('requiredCapabilities', [{"browserName": "chrome"}])
     projectID = request.json['projectID']
-    insert_runOrder(client_hash, runHash, runs, projectID, json.dumps(requiredCapabilities))
+    secretKey = request.json.get('secretKey','')
+    insert_runOrder(client_hash, runHash, runs, projectID, json.dumps(requiredCapabilities), secretKey)
     run_next_trace(runHash)
     print(runHash)
     return runHash
