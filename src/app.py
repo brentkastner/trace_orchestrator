@@ -7,7 +7,7 @@ app = Flask(__name__)
 base_url = os.environ.get('HOSTNAME') or 'http://localhost:3000'
 print(f"Starting server with {base_url}")
 
-def testTest():
+def trueFunction():
     return True
 
 def urlBuilder(trace, projectID, secretKey):

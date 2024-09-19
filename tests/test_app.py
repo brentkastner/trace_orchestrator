@@ -1,5 +1,5 @@
-from src.app import testTest
+from src.app import trueFunction
 
 def test_return_true() -> None:
-    assert testTest() == True
+    assert trueFunction() == True
     
