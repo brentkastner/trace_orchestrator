@@ -88,7 +88,7 @@ def newRun(client_hash):
     runs = request.json['runOrder']
     requiredCapabilities = request.json.get('requiredCapabilities', [{"browserName": "chrome"}])
     projectID = request.json['projectID']
-    secretKey = request.json.get('secretKey','')
+    secretKey = request.args.get('key')
     insert_runOrder(client_hash, runHash, runs, projectID, json.dumps(requiredCapabilities), secretKey)
     run_next_trace(runHash)
     print(runHash)
