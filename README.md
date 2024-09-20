@@ -83,7 +83,7 @@ Send this basic JSON document to /scheduleRun/<clienthash> as JSON and POST - th
 ```
 /scheduleRun/wKFv06_08lboHBo7l5NJIA/
 ```
-insert secret key if requred by the project /scheduleRun/wKFv06_08lboHBo7l5NJIA?key= 
+insert secret key if required by the project /scheduleRun/wKFv06_08lboHBo7l5NJIA?key= 
 
 ```
 
