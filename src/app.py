@@ -31,22 +31,22 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def insert_runOrder(client_hash, runHash, runs, projectID, requiredCapabilities, secretKey):
+def insert_runOrder(client_hash, runHash, runs, projectID, requiredCapabilities):
     con = get_db_connection()
     cur = con.cursor()
     for i in range(len(runs)):
-        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities, secretKey) VALUES (?,?,?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID, requiredCapabilities, secretKey))
+        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities) VALUES (?,?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID, requiredCapabilities))
         con.commit()
     con.close()
 
-def run_next_trace(runHash):
+def run_next_trace(runHash, secretKey):
     con = get_db_connection()
     cur = con.cursor()
     cur.execute("SELECT * from runs where run_hash = ? and usetrace_api_response is null ORDER BY runOrder ASC", (runHash,))
     row = cur.fetchone()
     if (row):
         print(f"{row['trace']} with and order of {row['runOrder']} for project ID {row['projectID']}")
-        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'], row['requiredCapabilities'], row['secretKey'])
+        response = call_usetrace_api(row['trace'], row['run_hash'], row['projectID'], row['requiredCapabilities'], secretKey)
         cur.execute("UPDATE runs SET usetrace_api_response = ? WHERE id = ?", (response, row['id']))
         con.commit()
     con.close()
@@ -89,8 +89,8 @@ def newRun(client_hash):
     requiredCapabilities = request.json.get('requiredCapabilities', [{"browserName": "chrome"}])
     projectID = request.json['projectID']
     secretKey = request.args.get('key')
-    insert_runOrder(client_hash, runHash, runs, projectID, json.dumps(requiredCapabilities), secretKey)
-    run_next_trace(runHash)
+    insert_runOrder(client_hash, runHash, runs, projectID, json.dumps(requiredCapabilities))
+    run_next_trace(runHash, secretKey)
     print(runHash)
     return runHash
 
