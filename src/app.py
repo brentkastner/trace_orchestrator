@@ -63,7 +63,6 @@ def call_usetrace_api(trace, run_hash, projectID, requiredCapabilities, secretKe
     if (response.status_code == 200):
         print(response.text)
         return response.text
-    return response.text
 
 @app.route("/")
 def home():
