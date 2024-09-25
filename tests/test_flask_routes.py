@@ -31,6 +31,11 @@ def test_index_route():
     assert response.status_code == 200
     assert response.data.decode('utf-8') == 'Hello, Trace Orchestrator!'
 
+def test_no_redirect_on_ending_slash():
+    response = app.test_client().post('/scheduleRun/wKFv06_08lboHBo7l5NJIA', headers={'Content-Type': 'application/json'})
+
+    assert response.status_code != 308
+
 def test_insert_runs_without_browsers_specified(setup):
     data = {"projectID": "dsfdsfdsfs", "runOrder": ["fdfsdfdsfsdfsdfs"]}
     response = app.test_client().post('/scheduleRun/wKFv06_08lboHBo7l5NJIA', data=json.dumps(data), headers={'Content-Type': 'application/json'})
