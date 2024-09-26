@@ -77,3 +77,19 @@ def test_project_id_is_saved(setup):
     runs = setup.execute('SELECT * FROM runs').fetchall()
     assert len(runs) == 1
     assert runs[0]['projectID'] == "dsfdsfdsfs"
+    
+def test_scheduleRun_with_key(setup):
+    data = {"projectID": "dsfdsfdsfs", "runOrder": ["fdfsdfdsfsdfsdfs"]}
+    response = app.test_client().post('/scheduleRun/wKFv06_08lboHBo7l5NJIA?key=testkey', data=json.dumps(data), headers={'Content-Type': 'application/json'})
+    runs = setup.execute('SELECT * FROM runs').fetchall()
+    assert len(runs) == 1
+    assert response.status_code == 200
+    assert runs[0]['secretKey'] == "testkey"
+
+def test_scheduleRun_without_key(setup):
+    data = {"projectID": "dsfdsfdsfs", "runOrder": ["fdfsdfdsfsdfsdfs"]}
+    response = app.test_client().post('/scheduleRun/wKFv06_08lboHBo7l5NJIA', data=json.dumps(data), headers={'Content-Type': 'application/json'})
+    runs = setup.execute('SELECT * FROM runs').fetchall()
+    assert len(runs) == 1
+    assert response.status_code == 200
+    assert runs[0]['secretKey'] == None
