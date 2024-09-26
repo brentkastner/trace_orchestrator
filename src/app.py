@@ -83,6 +83,7 @@ def runIndex():
     return render_template('runsIndex.html', runs=runs)
 
 @app.route("/scheduleRun/<client_hash>", methods=['POST'])
+@app.route("/scheduleRun/<client_hash>/", methods=['POST'])
 def newRun(client_hash):
     runHash = secrets.token_urlsafe(16)
     runs = request.json['runOrder']
@@ -95,6 +96,7 @@ def newRun(client_hash):
     return runHash
 
 @app.route("/webhook/<runHash>", methods=['POST'])
+@app.route("/webhook/<runHash>/", methods=['POST'])
 def webhook(runHash):
     run_next_trace(runHash)
     return runHash
