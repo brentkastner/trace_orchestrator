@@ -32,7 +32,7 @@ def test_index_route():
     assert response.data.decode('utf-8') == 'Hello, Trace Orchestrator!'
 
 def test_no_redirect_on_ending_slash():
-    response = app.test_client().post('/scheduleRun/wKFv06_08lboHBo7l5NJIA', headers={'Content-Type': 'application/json'})
+    response = app.test_client().post('/scheduleRun/wKFv06_08lboHBo7l5NJIA/', headers={'Content-Type': 'application/json'})
 
     assert response.status_code != 308
 

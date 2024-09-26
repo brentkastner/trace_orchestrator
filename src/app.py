@@ -35,7 +35,8 @@ def insert_runOrder(client_hash, runHash, runs, projectID, requiredCapabilities,
     con = get_db_connection()
     cur = con.cursor()
     for i in range(len(runs)):
-        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities, secretKey) VALUES (?,?,?,?,?,?,?)", (client_hash, runHash, i, runs[i], projectID, requiredCapabilities, secretKey))
+        cur.execute("INSERT INTO runs (client_hash, run_hash, runOrder, trace, projectID, requiredCapabilities, secretKey) VALUES (?,?,?,?,?,?,?)", 
+                    (client_hash, runHash, i, runs[i], projectID, requiredCapabilities, secretKey))
         con.commit()
     con.close()
 
